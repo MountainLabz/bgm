@@ -1,8 +1,8 @@
 # binary-greedy-meshing
-Originally a port of [Binary Greedy Meshing v2](https://github.com/cgerikj/binary-greedy-meshing) to Rust, with additional improvements such as support for transparent blocks.
+This is a modification of "Originally a port of [Binary Greedy Meshing v2](https://github.com/cgerikj/binary-greedy-meshing) to Rust, with additional improvements such as support for transparent blocks." by Inspirateur.
 
 ## How to use
-This crate is used in the Bevy voxel game [Riverbed](https://github.com/Inspirateur/riverbed), you can check out the code for usage examples.
+It works like the original, except it outputs quads as two u32s specifically for vertex pulling.
 
 ### Minimal example
 ```rust
@@ -26,16 +26,17 @@ fn main() {
 ```
 
 ### What to do with `mesh_data.quads`
-`mesh_data.quads` is a `[Vec<u64>; 6]`, 1 Vec<u64> per face type, each u64 encoding all the information of a quad in the following manner:
+`mesh_data.quads` is a vector of u64s (broken into u32s) each u64 encoding all the information of a quad in the following manner:
 ```rust
-(v_type << 32) | (h << 24) | (w << 18) | (z << 12) | (y << 6) | x
+let data1 = (x as u32) | ((y as u32) << 6) | ((z as u32) << 12) | ((w as u32) << 18) | ((h as u32) << 24);
+let data2 = (v_type as u32) | ((normal as u32) << 16);
 ```
 
-The face groups correspond to Up, Down, Right, Left, Front, Back, in this order. (assuming right handed Y up)
+The normal is used the gpu for vertex pulling instead of storing each of the quads in a different vector.
 
-The fastest way of rendering quads is using instancing (check [this video](https://www.youtube.com/watch?v=40JzyaOYJeY) to learn more about the topic), but if it's not available you can still convert the quads to vertices and indices making a regular mesh, see this Riverbed files for an example of this:
-- [src/render/mesh_utils.rs](https://github.com/Inspirateur/riverbed/blob/main/src/render/mesh_utils.rs) for Face+Quad => vertices conversion
-- [src/render/mesh_chunks.rs](https://github.com/Inspirateur/riverbed/blob/main/src/render/mesh_chunks.rs) for the rest of the meshing code (+ LOD)
+use vertex pulling.
+vertex pulling is more efficent than instancing because you don't send 6 verts (which are expensive) you just send 1 u64.
+the reason this is better is because instancing performs very badly on some gpu's. So its generally better.
 
 ## Performance
 Benching the crate on Intel(R) Xeon(R) CPU E5-1650 v3 @ 3.50GHz:
