@@ -38,7 +38,7 @@ impl From<u64> for Quad {
                 h: (value >> 24) & MASK6,
                 face: (value >> 30) & 0b111,
                 v_type: value >> 33,
-                //v_type: value >> 32
+                
             }
         }
     }
