@@ -26,7 +26,7 @@ fn main() {
 ```
 
 ### What to do with `mesh_data.quads`
-`mesh_data.quads` is a vector of u64s (broken into u32s) each u64 encoding all the information of a quad in the following manner:
+`mesh_data.quads` is a vector of u64s each u64 encoding all the information of a quad in the following manner:
 ```rust
 impl From<u64> for Quad {
         fn from(value: u64) -> Self {
