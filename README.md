@@ -2,7 +2,7 @@
 This is a modification of "Originally a port of [Binary Greedy Meshing v2](https://github.com/cgerikj/binary-greedy-meshing) to Rust, with additional improvements such as support for transparent blocks." by Inspirateur.
 
 ## How to use
-It works like the original, except it outputs quads as two u32s specifically for vertex pulling.
+It works like the original, except it outputs quads in a single vector of u64s specifically for vertex pulling.
 
 ### Minimal example
 ```rust
@@ -28,8 +28,20 @@ fn main() {
 ### What to do with `mesh_data.quads`
 `mesh_data.quads` is a vector of u64s (broken into u32s) each u64 encoding all the information of a quad in the following manner:
 ```rust
-let data1 = (x as u32) | ((y as u32) << 6) | ((z as u32) << 12) | ((w as u32) << 18) | ((h as u32) << 24);
-let data2 = (v_type as u32) | ((normal as u32) << 16);
+impl From<u64> for Quad {
+        fn from(value: u64) -> Self {
+            Self {
+                x: value & MASK6,
+                y: (value >> 6) & MASK6,
+                z: (value >> 12) & MASK6,
+                w: (value >> 18) & MASK6,
+                h: (value >> 24) & MASK6,
+                face: (value >> 30) & 0b111,
+                v_type: value >> 33,
+                //v_type: value >> 32
+            }
+        }
+    }
 ```
 
 The normal is used the gpu for vertex pulling instead of storing each of the quads in a different vector.
